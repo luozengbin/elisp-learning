@@ -1,0 +1,165 @@
+#+TITLE: 文字列操作する関数集合
+#+AUTHOR: Zengbin Luo
+
+* 正規表現でtrim-string関数を実装する
+** シナリオ
+正規表現式で文字列先頭と後尾の空白を削除する関数を作成する。
+
+** "^ " の誤用
+
+次ぎのコードで文字列先頭の空白を削除することが出来たが、本当に正しいのでしょうか？
+
+#+begin_src emacs-lisp
+(setq myString "  こんにちは!!!")
+(replace-regexp-in-string "^ +" "" myString)
+#+end_src
+
+#+results:
+: こんにちは!!!
+
+上の実行結果から正規表現式の "^ " 部分は行先頭の空白とマッチすると結論してしまうかもしれないが。
+それは間違いです。\\
+
+置換対象文字列に複数行がある場合、"^ "を使っていいのか？次ぎの例を見ていきましょう。
+
+#+begin_src emacs-lisp 
+(setq myString 
+"
+  Apple商品
+    (1) iPad
+    (2) iPhone
+")
+(replace-regexp-in-string "^ +" "•" myString)
+#+end_src
+
+#+results:
+: 
+: •Apple商品
+: •(1) iPad
+: •(2) iPhone
+
+replace-regexp-in-string関数の第二引数に "•" を使って置き換え処理した結果を見やすくようにする。
+
+*結論*
+ -^ - でマッチする部分は文字列に各行先頭の空白となっています。
+
+** "\`" を使いましょう
+
+文字列先頭の空白を削除する例
+#+begin_src emacs-lisp 
+(setq myString 
+"   Apple商品
+    (1) iPad
+    (2) iPhone")
+(replace-regexp-in-string "\\`[ \t\n]*" "" myString)
+#+end_src
+
+#+results:
+: Apple商品
+:     (1) iPad
+:     (2) iPhone
+
+文字列後尾の空白を削除する例
+#+begin_src emacs-lisp 
+(setq myString 
+"   Apple商品
+    (1) iPad
+    (2) iPhone     ")
+(replace-regexp-in-string "[ \t\n]*\\'" "" myString)
+#+end_src
+
+#+results:
+:    Apple商品
+:     (1) iPad
+:     (2) iPhone
+
+上記２つコードを組み合わせて作った関数
+
+#+INCLUDE: "./trim-string.el" src emacs-lisp-mode
+
+* if文法
+シンタクス
+#+begin_src emacs-lisp
+  (if (条件式) 
+      (式1)  ;条件がTrue時評価かれる
+      (式2)  ;条件がFalse時評価かれる
+  )
+#+end_src
+
+例１
+#+begin_src emacs-lisp
+  (if nil
+    (message "true")
+    (message "false")
+  )
+#+end_src 
+
+#+results:
+: false
+
+例２:falseブロックに複数式があった場合、最後の式のみ評価かれる
+この書き方は誤解される可能性があるので非推奨です。
+#+begin_src emacs-lisp 
+  (if nil
+    (message "false")
+    
+    (message "true")
+    (message "so true")
+    (message "yes really")
+  )
+#+end_src
+
+#+results:
+: yes really
+
+* 関数の書き方について
+
+*シンタクス*
+#+begin_example
+    (defun 関数名 (引数定義 ... &optional オプション引数)
+      "関数ドキュメント"
+      (interactive <引数初期化ブロック> )
+      ;; 関数本体
+      (let (var1 var2 ローカル変数定義)
+        (式1)
+        (式2)
+        (式3)
+        )
+      )  
+#+end_example
+
+*interactiveについて*
+関数をコマンドとして利用できるようにするための定義でる。
+コマンドとして利用されたときに必要な引数をinteractiveブロック内で採集すべき。
+
+- 引数初期化手法
+  - interactive "keyword" 規定のkeywordで良くある情報を取る
+  - ミニバッファーより入力値をもらう
+  - ロジックを組んで自動採集する
+_interactiven内組み込んた引数は必ず(list ....)の形で保持する。_
+
+*(interactive "r")について*
+=(interactive "r")= はカーソル位置による自動的にリージョンの開始位置と終了位置情報を
+収集して(list p1 p2)のリストを作成し関数の引数として利用される。\n
+
+[[file:mystrings.el::(defun%20remove-vowel%20(myString%20&optional%20p1%20p2%20)][remove-vowel関数定義事例]] を参考しながら、内容を確認する。
+
+*例：関数として使う*
+#+begin_src emacs-lisp
+  (remove-vowel "a1e2i3o4u5")
+#+end_src
+
+#+results:
+: 12345
+
+*例：コマンドとして使う*
+次の文字を選択して M-x remove-vowelを実行する。
+#+BEGIN_EXAMPLE
+  a1e2i3o4u5
+#+END_EXAMPLE
+
+#+results
+12345
+
+
+
