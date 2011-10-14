@@ -7,14 +7,10 @@
 の引数に渡す。実はこのにlamda式でもいける、かつlamda式内置換対象文字を引数として参照
 することが可能です。
 
-#+begin_src emacs-lisp 
-  (defun replace-digits-by-subscript3 (string)
-  "Replace digits by Unicode subscript characters in STRING.
-For example, 「103 and 42」 ⇒ 「₁₀₃ and ₄₂」."
-  (let ((myStr string))
-    (replace-regexp-in-string "[0-9]"
-                              (lambda (arg) (string (aref "₀₁₂₃₄₅₆₇₈₉" (string-to-number arg)))) myStr)
-    ))
-#+end_src
+#+INCLUDE: "01.replace-digits-by-subscript.el" example
+
+_リンク_ file:./01.replace-digits-by-subscript.el
 
 ※ =aref= はjavaのindexOfメソッドと相当するもの。
+
+
