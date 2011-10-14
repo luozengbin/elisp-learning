@@ -1,0 +1,20 @@
+#+TITLE: 文字列置換関数の使い方
+
+* replace-regexp-in-string関数
+
+次ぎコードのにreplace-regexp-in-string関数の部分に注目してください。
+通常では =(replace-regexp-in-string "9" "₉" myStr)= このように置換文字を関数の２番目
+の引数に渡す。実はこのにlamda式でもいける、かつlamda式内置換対象文字を引数として参照
+することが可能です。
+
+#+begin_src emacs-lisp 
+  (defun replace-digits-by-subscript3 (string)
+  "Replace digits by Unicode subscript characters in STRING.
+For example, 「103 and 42」 ⇒ 「₁₀₃ and ₄₂」."
+  (let ((myStr string))
+    (replace-regexp-in-string "[0-9]"
+                              (lambda (arg) (string (aref "₀₁₂₃₄₅₆₇₈₉" (string-to-number arg)))) myStr)
+    ))
+#+end_src
+
+※ =aref= はjavaのindexOfメソッドと相当するもの。
