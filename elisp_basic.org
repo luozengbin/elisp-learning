@@ -1,0 +1,23 @@
+#+TITLE: emacs-lispの基礎
+
+* メッセージ出力
+
+- リスト１
+#+begin_example 
+  (message "出力したい内容")
+#+end_example
+
+- リスト２
+#+begin_example 
+  (message "aaaaaa %x" bbb)
+#+end_example
+
+|-----+-----------|
+| Exp | Format    |
+|-----+-----------|
+| %d  | Number    |
+| %s  | String    |
+| %c  | character |
+| %S  | list      |
+|-----+-----------|
+
