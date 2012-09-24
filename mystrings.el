@@ -64,5 +64,61 @@ If MYSTR nil, change the text in the region between positions p1 p2."
         (delete-region p1 p2)
         (insert outputStr) )) ) )
 
+(defun title-case-string-region-or-line (ξstring &optional ξregion-boundary)
+  "Capitalize the current line or text selection, following title conventions.
+
+Capitalize first letter of each word, except words like {to, of,
+the, a, in, or, and, …}. If a word already contains cap letters
+such as HTTP, URL, they are left as is.
+
+When called in a elisp program, if ξREGION-BOUNDARY is nil,
+returns the changed ξSTRING, else, work on the region.
+ξREGION-BOUNDARY is a pair [from to], it can be a vector or
+list."
+  (interactive
+   (let ((bds (get-selection-or-unit 'line)))
+     (list nil (vector (elt bds 1) (elt bds 2)) ) ) )
+
+  (let ( replacePairs
+         (workOnStringP (if ξregion-boundary nil t ) )
+         (p1 (elt ξregion-boundary 0))
+         (p2 (elt ξregion-boundary 1))
+         )
+    
+    (setq replacePairs '(
+                         [" A " " a "]
+                         [" And " " and "]
+                         [" At " " at "]
+                         [" As " " as "]
+                         [" By " " by "]
+                         [" Be " " be "]
+                         [" Into " " into "]
+                         [" In " " in "]
+                         [" Is " " is "]
+                         [" It " " it "]
+                         [" For " " for "]
+                         [" Of " " of "]
+                         [" Or " " or "]
+                         [" On " " on "]
+                         [" The " " the "]
+                         [" That " " that "]
+                         [" To " " to "]
+                         [" Vs " " vs "]
+                         [" With " " with "]
+                         [" From " " from "]
+                         ))
+
+    (let ((case-fold-search nil))
+      (if workOnStringP
+          (progn
+            (replace-pairs-in-string-recursive (upcase-initials ξstring) replacePairs)
+            )
+        (progn
+          (save-restriction
+            (narrow-to-region p1 p2)
+            (upcase-initials-region (point-min) (point-max) )
+            (replace-regexp-pairs-region (point-min) (point-max) replacePairs t t)
+            ) ) ) ) ) )
+
 (provide 'mystrings)
 ;;; trim-string.el ends here
